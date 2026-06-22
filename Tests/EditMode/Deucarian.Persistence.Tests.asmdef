@@ -1,0 +1,22 @@
+{
+  "name": "Deucarian.Persistence.Tests",
+  "rootNamespace": "Deucarian.Persistence.Tests",
+  "references": [
+    "Deucarian.Persistence",
+    "Deucarian.Persistence.Unity"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "noEngineReferences": false
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Deucarian.Persistence.Unity",
+  "rootNamespace": "Deucarian.Persistence.Unity",
+  "references": [
+    "Deucarian.Persistence"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
