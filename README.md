@@ -66,3 +66,42 @@ LoadResult<SettingsDto> load = await service.LoadAsync(definition, SaveSlotId.De
 ```
 
 See `Samples~/VersionedLocalSave` for settings, profile, and run-resume documents.
+
+## Install
+
+Stable:
+
+```json
+"com.deucarian.persistence": "https://github.com/Deucarian/Persistence.git#main"
+```
+
+Development:
+
+```json
+"com.deucarian.persistence": "https://github.com/Deucarian/Persistence.git#develop"
+```
+
+Use `#main` for stable package consumption and `#develop` when testing active package work.
+
+## When To Use This
+
+Use this package when you need Versioned local document persistence with migrations, validation, atomic file writes, backups, and recovery.
+
+Do not use this package to take ownership of capabilities outside its `AGENTS.md` boundary. Reusable behavior should stay with the package that owns that capability in the Package Registry governance docs.
+
+## Quick Start
+
+1. Install the package through Deucarian Package Installer or Unity Package Manager using the URL above.
+2. Let Unity finish resolving packages and compiling assemblies.
+3. Import the `Versioned Local Save` sample if you want a working reference scene or setup.
+4. Start from the package README sections above and the public runtime/editor APIs in this repository.
+
+## Troubleshooting
+
+- Package does not resolve: confirm the stable or development Git URL matches the Package Registry entry and that required Deucarian dependencies are installed.
+- Unity compile errors after install: let Package Manager finish resolving dependencies, then check asmdef references against `package.json` dependencies.
+- Behavior appears to belong in another package: consult `AGENTS.md` and the Package Registry governance docs before moving or duplicating code.
+
+## License
+
+MIT. See `LICENSE.md`.
