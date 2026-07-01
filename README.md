@@ -102,6 +102,20 @@ Do not use this package to take ownership of capabilities outside its `AGENTS.md
 - Unity compile errors after install: let Package Manager finish resolving dependencies, then check asmdef references against `package.json` dependencies.
 - Behavior appears to belong in another package: consult `AGENTS.md` and the Package Registry governance docs before moving or duplicating code.
 
+## Validation
+
+Run the shared package validator from this repository root:
+
+```powershell
+python C:/Repositories/Package-Registry/Tools/deucarian_package_validator.py --registry-root C:/Repositories/Package-Registry --repository-root . --config deucarian-package.json
+```
+
+Documentation-only updates should still pass:
+
+```powershell
+git diff --check
+```
+
 ## License
 
 MIT. See `LICENSE.md`.
