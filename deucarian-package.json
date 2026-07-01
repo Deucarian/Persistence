@@ -1,0 +1,23 @@
+{
+  "packageId": "com.deucarian.persistence",
+  "displayName": "Deucarian Persistence",
+  "ownedCapabilities": [],
+  "runtimeAssemblies": [
+    "Deucarian.Persistence",
+    "Deucarian.Persistence.Unity"
+  ],
+  "editorAssemblies": [
+    "Deucarian.Persistence.Editor"
+  ],
+  "sampleAssemblies": [],
+  "testAssemblies": [
+    "Deucarian.Persistence.Tests"
+  ],
+  "requiredDependencies": [
+    "com.unity.nuget.newtonsoft-json"
+  ],
+  "optionalVersionDefinedDependencies": [],
+  "allowedDirectDebugCalls": [],
+  "allowedDirectUnityObjectLifetimeCalls": [],
+  "expectedSamplesRoot": "Samples~"
+}
