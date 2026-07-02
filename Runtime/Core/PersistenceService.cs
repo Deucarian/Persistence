@@ -38,7 +38,7 @@ namespace Deucarian.Persistence
             SemaphoreSlim semaphore = GetLock(location);
             try
             {
-                await semaphore.WaitAsync(cancellationToken);
+                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -47,7 +47,7 @@ namespace Deucarian.Persistence
 
             try
             {
-                return await LoadInternalAsync(definition, location, cancellationToken);
+                return await LoadInternalAsync(definition, location, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -73,7 +73,7 @@ namespace Deucarian.Persistence
             SemaphoreSlim semaphore = GetLock(location);
             try
             {
-                await semaphore.WaitAsync(cancellationToken);
+                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -83,23 +83,23 @@ namespace Deucarian.Persistence
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await CleanupTempFilesAsync(location, cancellationToken);
+                await CleanupTempFilesAsync(location, cancellationToken).ConfigureAwait(false);
                 string primary = PrimaryName(location);
                 string temp = TempName(location);
                 string envelope = SaveEnvelopeCodec.Create(definition, document, _serializer, _clock.UtcNow);
-                await _storage.WriteTextAsync(temp, envelope, cancellationToken);
-                await RotatePrimaryToBackupAsync(location, definition.BackupRetention, cancellationToken);
+                await _storage.WriteTextAsync(temp, envelope, cancellationToken).ConfigureAwait(false);
+                await RotatePrimaryToBackupAsync(location, definition.BackupRetention, cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    await _storage.MoveAsync(temp, primary, true, cancellationToken);
+                    await _storage.MoveAsync(temp, primary, true, cancellationToken).ConfigureAwait(false);
                 }
                 catch
                 {
-                    await RestoreNewestBackupIfPrimaryMissingAsync(location, cancellationToken);
+                    await RestoreNewestBackupIfPrimaryMissingAsync(location, cancellationToken).ConfigureAwait(false);
                     throw;
                 }
 
-                await EnforceBackupRetentionAsync(location, definition.BackupRetention, cancellationToken);
+                await EnforceBackupRetentionAsync(location, definition.BackupRetention, cancellationToken).ConfigureAwait(false);
                 return WriteResult.Success(WriteOutcome.Saved);
             }
             catch (OperationCanceledException)
@@ -127,10 +127,10 @@ namespace Deucarian.Persistence
             SemaphoreSlim semaphore = GetLock(location);
             try
             {
-                await semaphore.WaitAsync(cancellationToken);
+                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 string primary = PrimaryName(location);
-                bool existed = await _storage.ExistsAsync(primary, cancellationToken);
-                await _storage.DeleteAsync(primary, cancellationToken);
+                bool existed = await _storage.ExistsAsync(primary, cancellationToken).ConfigureAwait(false);
+                await _storage.DeleteAsync(primary, cancellationToken).ConfigureAwait(false);
                 return WriteResult.Success(existed ? WriteOutcome.Deleted : WriteOutcome.Missing);
             }
             catch (OperationCanceledException)
@@ -166,34 +166,34 @@ namespace Deucarian.Persistence
         {
             try
             {
-                await CleanupTempFilesAsync(location, cancellationToken);
+                await CleanupTempFilesAsync(location, cancellationToken).ConfigureAwait(false);
                 string primary = PrimaryName(location);
-                if (await _storage.ExistsAsync(primary, cancellationToken))
+                if (await _storage.ExistsAsync(primary, cancellationToken).ConfigureAwait(false))
                 {
-                    LoadResult<T> primaryResult = await TryLoadFromFileAsync(definition, primary, RecoverySource.Primary, LoadOutcome.LoadedPrimary, cancellationToken);
+                    LoadResult<T> primaryResult = await TryLoadFromFileAsync(definition, primary, RecoverySource.Primary, LoadOutcome.LoadedPrimary, cancellationToken).ConfigureAwait(false);
                     if (primaryResult.Succeeded)
                     {
                         return primaryResult;
                     }
 
-                    IReadOnlyList<string> availableBackups = await BackupNamesNewestFirstAsync(location, cancellationToken);
+                    IReadOnlyList<string> availableBackups = await BackupNamesNewestFirstAsync(location, cancellationToken).ConfigureAwait(false);
                     if (availableBackups.Count == 0)
                     {
                         return primaryResult;
                     }
                 }
 
-                IReadOnlyList<string> backups = await BackupNamesNewestFirstAsync(location, cancellationToken);
+                IReadOnlyList<string> backups = await BackupNamesNewestFirstAsync(location, cancellationToken).ConfigureAwait(false);
                 foreach (string backup in backups)
                 {
-                    LoadResult<T> result = await TryLoadFromFileAsync(definition, backup, RecoverySource.Backup, LoadOutcome.RecoveredFromBackup, cancellationToken);
+                    LoadResult<T> result = await TryLoadFromFileAsync(definition, backup, RecoverySource.Backup, LoadOutcome.RecoveredFromBackup, cancellationToken).ConfigureAwait(false);
                     if (result.Succeeded)
                     {
                         return result;
                     }
                 }
 
-                if (!await _storage.ExistsAsync(primary, cancellationToken) && backups.Count == 0)
+                if (!await _storage.ExistsAsync(primary, cancellationToken).ConfigureAwait(false) && backups.Count == 0)
                 {
                     return CreateDefault(definition, "No save existed.");
                 }
@@ -215,7 +215,7 @@ namespace Deucarian.Persistence
             string text;
             try
             {
-                text = await _storage.ReadTextAsync(fileName, cancellationToken);
+                text = await _storage.ReadTextAsync(fileName, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
@@ -315,51 +315,51 @@ namespace Deucarian.Persistence
         private async Task RotatePrimaryToBackupAsync(DocumentLocation location, int retention, CancellationToken cancellationToken)
         {
             string primary = PrimaryName(location);
-            if (retention <= 0 || !await _storage.ExistsAsync(primary, cancellationToken))
+            if (retention <= 0 || !await _storage.ExistsAsync(primary, cancellationToken).ConfigureAwait(false))
             {
                 return;
             }
 
             string backup = BackupName(location);
-            await _storage.MoveAsync(primary, backup, true, cancellationToken);
+            await _storage.MoveAsync(primary, backup, true, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task RestoreNewestBackupIfPrimaryMissingAsync(DocumentLocation location, CancellationToken cancellationToken)
         {
             string primary = PrimaryName(location);
-            if (await _storage.ExistsAsync(primary, cancellationToken))
+            if (await _storage.ExistsAsync(primary, cancellationToken).ConfigureAwait(false))
             {
                 return;
             }
 
-            string backup = (await BackupNamesNewestFirstAsync(location, cancellationToken)).FirstOrDefault();
+            string backup = (await BackupNamesNewestFirstAsync(location, cancellationToken).ConfigureAwait(false)).FirstOrDefault();
             if (!string.IsNullOrEmpty(backup))
             {
-                await _storage.MoveAsync(backup, primary, true, cancellationToken);
+                await _storage.MoveAsync(backup, primary, true, cancellationToken).ConfigureAwait(false);
             }
         }
 
         private async Task EnforceBackupRetentionAsync(DocumentLocation location, int retention, CancellationToken cancellationToken)
         {
-            IReadOnlyList<string> backups = await BackupNamesNewestFirstAsync(location, cancellationToken);
+            IReadOnlyList<string> backups = await BackupNamesNewestFirstAsync(location, cancellationToken).ConfigureAwait(false);
             for (int index = retention; index < backups.Count; index++)
             {
-                await _storage.DeleteAsync(backups[index], cancellationToken);
+                await _storage.DeleteAsync(backups[index], cancellationToken).ConfigureAwait(false);
             }
         }
 
         private async Task<IReadOnlyList<string>> BackupNamesNewestFirstAsync(DocumentLocation location, CancellationToken cancellationToken)
         {
-            IReadOnlyList<string> names = await _storage.ListAsync(location.FileStem + ".json.bak.", cancellationToken);
+            IReadOnlyList<string> names = await _storage.ListAsync(location.FileStem + ".json.bak.", cancellationToken).ConfigureAwait(false);
             return names.OrderByDescending(name => name, StringComparer.Ordinal).ToArray();
         }
 
         private async Task CleanupTempFilesAsync(DocumentLocation location, CancellationToken cancellationToken)
         {
-            IReadOnlyList<string> names = await _storage.ListAsync(location.FileStem + ".json.tmp.", cancellationToken);
+            IReadOnlyList<string> names = await _storage.ListAsync(location.FileStem + ".json.tmp.", cancellationToken).ConfigureAwait(false);
             foreach (string name in names)
             {
-                await _storage.DeleteAsync(name, cancellationToken);
+                await _storage.DeleteAsync(name, cancellationToken).ConfigureAwait(false);
             }
         }
 

@@ -60,7 +60,7 @@ namespace Deucarian.Persistence
             using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                return await reader.ReadToEndAsync();
+                return await reader.ReadToEndAsync().ConfigureAwait(false);
             }
         }
 
@@ -78,8 +78,8 @@ namespace Deucarian.Persistence
             using (FileStream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
-                await stream.FlushAsync(cancellationToken);
+                await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken).ConfigureAwait(false);
+                await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 

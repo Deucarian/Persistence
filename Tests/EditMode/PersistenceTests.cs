@@ -76,6 +76,37 @@ namespace Deucarian.Persistence.Tests
         }
 
         [Test]
+        public void FileBackedSaveCanCompleteWhenSynchronouslyWaitedUnderSynchronizationContext()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "deucarian-persistence-sync-wait-" + Guid.NewGuid().ToString("N"));
+            SynchronizationContext previous = SynchronizationContext.Current;
+            try
+            {
+                Directory.CreateDirectory(root);
+                SynchronizationContext.SetSynchronizationContext(new NonPumpingSynchronizationContext());
+                var service = new PersistenceService(new FileTextStorage(new FixedPathProvider(root)));
+                var document = new ProfileDocument
+                {
+                    PlayerName = "Player",
+                    Notes = new string('x', 1024 * 1024)
+                };
+
+                Task<WriteResult> save = service.SaveAsync(ProfileDefinition(), document, SaveSlotId.Default);
+
+                Assert.That(save.Wait(TimeSpan.FromSeconds(2)), Is.True, "File-backed save deadlocked while synchronously waiting on a captured synchronization context.");
+                Assert.That(save.Result.Succeeded, Is.True);
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previous);
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, recursive: true);
+                }
+            }
+        }
+
+        [Test]
         public async Task ValidationBeforeSaveAndAfterLoad()
         {
             Harness<SettingsDocument> harness = SettingsHarness();
@@ -552,6 +583,25 @@ namespace Deucarian.Persistence.Tests
             private long _ticks = new DateTimeOffset(2026, 6, 22, 0, 0, 0, TimeSpan.Zero).Ticks;
 
             public DateTimeOffset UtcNow => new DateTimeOffset(Interlocked.Add(ref _ticks, TimeSpan.TicksPerSecond), TimeSpan.Zero);
+        }
+
+        private sealed class FixedPathProvider : IPersistencePathProvider
+        {
+            private readonly string _root;
+
+            public FixedPathProvider(string root)
+            {
+                _root = root;
+            }
+
+            public string GetRootPath() => _root;
+        }
+
+        private sealed class NonPumpingSynchronizationContext : SynchronizationContext
+        {
+            public override void Post(SendOrPostCallback d, object state)
+            {
+            }
         }
 
         public sealed class SettingsDocument
