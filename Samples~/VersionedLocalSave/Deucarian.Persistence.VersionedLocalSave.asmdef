@@ -1,0 +1,17 @@
+{
+  "name": "Deucarian.Persistence.VersionedLocalSave",
+  "rootNamespace": "Deucarian.Persistence.Samples",
+  "references": [
+    "Deucarian.Persistence",
+    "Deucarian.Persistence.Unity"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

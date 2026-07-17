@@ -1,6 +1,6 @@
 {
   "name": "com.deucarian.persistence",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Deucarian Persistence",
   "description": "Versioned local document persistence with migrations, validation, atomic file writes, backups, and recovery.",
   "unity": "2021.3",
