@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 - 2026-07-17
+
+- Added isolated Versioned Local Save sample documentation and assembly metadata.
+
 ## 0.1.0 - 2026-06-22
 
 - Added initial local Persistence package.

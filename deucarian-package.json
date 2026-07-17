@@ -1,6 +1,7 @@
 {
   "packageId": "com.deucarian.persistence",
   "displayName": "Deucarian Persistence",
+  "samplePolicy": "compiled-example",
   "ownedCapabilities": [],
   "runtimeAssemblies": [
     "Deucarian.Persistence",
@@ -9,7 +10,9 @@
   "editorAssemblies": [
     "Deucarian.Persistence.Editor"
   ],
-  "sampleAssemblies": [],
+  "sampleAssemblies": [
+    "Deucarian.Persistence.VersionedLocalSave"
+  ],
   "testAssemblies": [
     "Deucarian.Persistence.Tests"
   ],
