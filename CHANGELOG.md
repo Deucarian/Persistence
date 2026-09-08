@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 - Unreleased
+
+- Fix canceled lock waits, delete recovery copies together with their primary document, and let accepted operations finish during disposal.
+
 ## 0.1.1 - 2026-07-17
 
 - Added isolated Versioned Local Save sample documentation and assembly metadata.

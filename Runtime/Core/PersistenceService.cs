@@ -13,10 +13,8 @@ namespace Deucarian.Persistence
         private readonly ITextStorage _storage;
         private readonly IPersistenceSerializer _serializer;
         private readonly IPersistenceClock _clock;
-        private readonly Dictionary<DocumentLocation, SemaphoreSlim> _locks = new Dictionary<DocumentLocation, SemaphoreSlim>();
-        private readonly object _gate = new object();
+        private readonly DocumentOperationLocks _locks = new DocumentOperationLocks();
         private int _sequence;
-        private bool _disposed;
 
         /// <summary>Creates a persistence service.</summary>
         public PersistenceService(ITextStorage storage, IPersistenceSerializer serializer = null, IPersistenceClock clock = null)
@@ -29,36 +27,37 @@ namespace Deucarian.Persistence
         /// <inheritdoc />
         public async Task<LoadResult<T>> LoadAsync<T>(DocumentDefinition<T> definition, SaveSlotId slotId, CancellationToken cancellationToken = default)
         {
-            if (_disposed)
+            if (_locks.IsDisposed)
             {
                 return LoadResult<T>.Failure(LoadOutcome.StorageFailure, PersistenceFailureReason.Disposed, RecoverySource.None, "Persistence service is disposed.");
             }
 
             DocumentLocation location = new DocumentLocation(definition.DocumentId, slotId);
-            SemaphoreSlim semaphore = GetLock(location);
+            IDisposable operation;
             try
             {
-                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                operation = await _locks.AcquireAsync(location, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 return LoadResult<T>.Failure(LoadOutcome.Canceled, PersistenceFailureReason.Canceled, RecoverySource.None, "Load canceled.");
             }
 
-            try
+            if (operation == null)
+            {
+                return LoadResult<T>.Failure(LoadOutcome.StorageFailure, PersistenceFailureReason.Disposed, RecoverySource.None, "Persistence service is disposed.");
+            }
+
+            using (operation)
             {
                 return await LoadInternalAsync(definition, location, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                semaphore.Release();
             }
         }
 
         /// <inheritdoc />
         public async Task<WriteResult> SaveAsync<T>(DocumentDefinition<T> definition, T document, SaveSlotId slotId, CancellationToken cancellationToken = default)
         {
-            if (_disposed)
+            if (_locks.IsDisposed)
             {
                 return WriteResult.Failure(WriteOutcome.Disposed, PersistenceFailureReason.Disposed, "Persistence service is disposed.");
             }
@@ -70,14 +69,19 @@ namespace Deucarian.Persistence
             }
 
             DocumentLocation location = new DocumentLocation(definition.DocumentId, slotId);
-            SemaphoreSlim semaphore = GetLock(location);
+            IDisposable operation;
             try
             {
-                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                operation = await _locks.AcquireAsync(location, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 return WriteResult.Failure(WriteOutcome.Canceled, PersistenceFailureReason.Canceled, "Save canceled.");
+            }
+
+            if (operation == null)
+            {
+                return WriteResult.Failure(WriteOutcome.Disposed, PersistenceFailureReason.Disposed, "Persistence service is disposed.");
             }
 
             try
@@ -112,26 +116,38 @@ namespace Deucarian.Persistence
             }
             finally
             {
-                semaphore.Release();
+                operation.Dispose();
             }
         }
 
         /// <inheritdoc />
         public async Task<WriteResult> DeleteAsync(DocumentLocation location, CancellationToken cancellationToken = default)
         {
-            if (_disposed)
+            if (_locks.IsDisposed)
             {
                 return WriteResult.Failure(WriteOutcome.Disposed, PersistenceFailureReason.Disposed, "Persistence service is disposed.");
             }
 
-            SemaphoreSlim semaphore = GetLock(location);
+            IDisposable operation = null;
             try
             {
-                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                operation = await _locks.AcquireAsync(location, cancellationToken).ConfigureAwait(false);
+                if (operation == null)
+                {
+                    return WriteResult.Failure(WriteOutcome.Disposed, PersistenceFailureReason.Disposed, "Persistence service is disposed.");
+                }
+
                 string primary = PrimaryName(location);
                 bool existed = await _storage.ExistsAsync(primary, cancellationToken).ConfigureAwait(false);
+                await CleanupTempFilesAsync(location, cancellationToken).ConfigureAwait(false);
+                IReadOnlyList<string> backups = await BackupNamesNewestFirstAsync(location, cancellationToken).ConfigureAwait(false);
+                // Keep the latest primary until all recovery copies are gone, including on interrupted deletion.
+                foreach (string backup in backups)
+                {
+                    await _storage.DeleteAsync(backup, cancellationToken).ConfigureAwait(false);
+                }
                 await _storage.DeleteAsync(primary, cancellationToken).ConfigureAwait(false);
-                return WriteResult.Success(existed ? WriteOutcome.Deleted : WriteOutcome.Missing);
+                return WriteResult.Success(existed || backups.Count > 0 ? WriteOutcome.Deleted : WriteOutcome.Missing);
             }
             catch (OperationCanceledException)
             {
@@ -143,23 +159,14 @@ namespace Deucarian.Persistence
             }
             finally
             {
-                semaphore.Release();
+                operation?.Dispose();
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>Rejects new operations. Already accepted operations drain without blocking this caller.</summary>
         public void Dispose()
         {
-            _disposed = true;
-            lock (_gate)
-            {
-                foreach (SemaphoreSlim semaphore in _locks.Values)
-                {
-                    semaphore.Dispose();
-                }
-
-                _locks.Clear();
-            }
+            _locks.Dispose();
         }
 
         private async Task<LoadResult<T>> LoadInternalAsync<T>(DocumentDefinition<T> definition, DocumentLocation location, CancellationToken cancellationToken)
@@ -296,20 +303,6 @@ namespace Deucarian.Persistence
             }
 
             return definition.Validator == null ? ValidationResult.Success() : definition.Validator.Validate(document);
-        }
-
-        private SemaphoreSlim GetLock(DocumentLocation location)
-        {
-            lock (_gate)
-            {
-                if (!_locks.TryGetValue(location, out SemaphoreSlim semaphore))
-                {
-                    semaphore = new SemaphoreSlim(1, 1);
-                    _locks.Add(location, semaphore);
-                }
-
-                return semaphore;
-            }
         }
 
         private async Task RotatePrimaryToBackupAsync(DocumentLocation location, int retention, CancellationToken cancellationToken)
