@@ -360,7 +360,10 @@ namespace Deucarian.Persistence
         /// <summary>Saves a document.</summary>
         Task<WriteResult> SaveAsync<T>(DocumentDefinition<T> definition, T document, SaveSlotId slotId, CancellationToken cancellationToken = default);
 
-        /// <summary>Deletes a document.</summary>
+        /// <summary>
+        /// Deletes a document and its recovery history. Backups are deleted before the primary, so an
+        /// interrupted deletion retains the primary for retry. Only Deleted or Missing confirms completion.
+        /// </summary>
         Task<WriteResult> DeleteAsync(DocumentLocation location, CancellationToken cancellationToken = default);
     }
 }
