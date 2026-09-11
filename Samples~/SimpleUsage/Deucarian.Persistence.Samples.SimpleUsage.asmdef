@@ -1,0 +1,9 @@
+{
+  "name": "Deucarian.Persistence.Samples.SimpleUsage",
+  "references": [
+    "Deucarian.Persistence",
+    "Deucarian.Persistence.Unity"
+  ],
+  "autoReferenced": false,
+  "noEngineReferences": false
+}

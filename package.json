@@ -19,13 +19,19 @@
     "backup"
   ],
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.deucarian.editor": "1.10.8"
   },
   "samples": [
     {
       "displayName": "Versioned Local Save",
       "description": "Demonstrates settings, profile, and run-resume documents with migration and recovery outcomes.",
       "path": "Samples~/VersionedLocalSave"
+    },
+    {
+      "displayName": "Simple Usage",
+      "description": "Minimal calls through the configured package host.",
+      "path": "Samples~/SimpleUsage"
     }
   ]
 }

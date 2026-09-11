@@ -2,6 +2,7 @@
   "name": "Deucarian.Persistence.Tests",
   "rootNamespace": "Deucarian.Persistence.Tests",
   "references": [
+    "Deucarian.Editor",
     "Deucarian.Persistence",
     "Deucarian.Persistence.Unity"
   ],
