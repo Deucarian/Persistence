@@ -1,5 +1,7 @@
 # Deucarian Persistence
 
+For simple calls and setup, see [Simple usage](Documentation~/SimpleUsage.md).
+
 Generic local persistence for Unity applications and games.
 
 Package ID: `com.deucarian.persistence`

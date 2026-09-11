@@ -26,6 +26,11 @@
       "displayName": "Versioned Local Save",
       "description": "Demonstrates settings, profile, and run-resume documents with migration and recovery outcomes.",
       "path": "Samples~/VersionedLocalSave"
+    },
+    {
+      "displayName": "Simple Usage",
+      "description": "Minimal calls through the configured package host.",
+      "path": "Samples~/SimpleUsage"
     }
   ]
 }

@@ -11,7 +11,8 @@
     "Deucarian.Persistence.Editor"
   ],
   "sampleAssemblies": [
-    "Deucarian.Persistence.VersionedLocalSave"
+    "Deucarian.Persistence.VersionedLocalSave",
+    "Deucarian.Persistence.Samples.SimpleUsage"
   ],
   "testAssemblies": [
     "Deucarian.Persistence.Tests"
