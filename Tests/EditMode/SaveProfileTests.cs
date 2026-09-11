@@ -15,12 +15,12 @@ namespace Deucarian.Persistence.Tests
             using (var b = new SaveProfile(service, new SaveSlotId("b")))
             {
                 a.Register(definition); b.Register(definition);
-                Assert.That((await a.SaveAsync("settings", new Data { Value = 5 })).Succeeded, Is.True);
-                Assert.That((await b.LoadAsync<Data>("settings")).Document.Value, Is.Zero);
-                Assert.That((await a.LoadAsync<Data>("settings")).Document.Value, Is.EqualTo(5));
-                Assert.Throws<InvalidOperationException>(() => a.LoadAsync<string>("settings"));
+                Assert.That((await a.SaveAsync(new SaveProfileTestsKey<Data>("settings"), new Data { Value = 5 })).Succeeded, Is.True);
+                Assert.That((await b.LoadAsync(new SaveProfileTestsKey<Data>("settings"))).Document.Value, Is.Zero);
+                Assert.That((await a.LoadAsync(new SaveProfileTestsKey<Data>("settings"))).Document.Value, Is.EqualTo(5));
+                Assert.Throws<InvalidOperationException>(() => a.LoadAsync(new SaveProfileTestsKey<string>("settings")));
                 a.Dispose();
-                Assert.That((await b.SaveAsync("settings", new Data())).Succeeded, Is.True);
+                Assert.That((await b.SaveAsync(new SaveProfileTestsKey<Data>("settings"), new Data())).Succeeded, Is.True);
             }
         }
         public sealed class Data { public int Value; }

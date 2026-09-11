@@ -19,7 +19,8 @@
     "backup"
   ],
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.deucarian.editor": "1.10.8"
   },
   "samples": [
     {

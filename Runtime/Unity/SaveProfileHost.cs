@@ -21,10 +21,10 @@ namespace Deucarian.Persistence.Unity
             ownsProfile = takeOwnership;
         }
 
-        public Task<WriteResult> SaveAsync<T>(string id, T data, CancellationToken cancellationToken = default) =>
-            Profile.SaveAsync(id, data, cancellationToken);
-        public Task<LoadResult<T>> LoadAsync<T>(string id, CancellationToken cancellationToken = default) =>
-            Profile.LoadAsync<T>(id, cancellationToken);
+        public Task<WriteResult> SaveAsync<T>(SaveKey<T> key, T data, CancellationToken cancellationToken = default) =>
+            Profile.SaveAsync(key, data, cancellationToken);
+        public Task<LoadResult<T>> LoadAsync<T>(SaveKey<T> key, CancellationToken cancellationToken = default) =>
+            Profile.LoadAsync(key, cancellationToken);
         private SaveProfile Profile => profile ?? throw new InvalidOperationException("Configure a save profile first.");
         private void OnDestroy()
         {

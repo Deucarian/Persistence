@@ -29,18 +29,20 @@ namespace Deucarian.Persistence
             definitions.Add(definition.DocumentId.Value, definition);
         }
 
-        public Task<WriteResult> SaveAsync<T>(string id, T document, CancellationToken cancellationToken = default) =>
-            persistence.SaveAsync(Definition<T>(id), document, Slot, cancellationToken);
-        public Task<LoadResult<T>> LoadAsync<T>(string id, CancellationToken cancellationToken = default) =>
-            persistence.LoadAsync(Definition<T>(id), Slot, cancellationToken);
+        public Task<WriteResult> SaveAsync<T>(ISaveKey<T> key, T document, CancellationToken cancellationToken = default) =>
+            persistence.SaveAsync(Definition(key), document, Slot, cancellationToken);
+        public Task<LoadResult<T>> LoadAsync<T>(ISaveKey<T> key, CancellationToken cancellationToken = default) =>
+            persistence.LoadAsync(Definition(key), Slot, cancellationToken);
 
-        private DocumentDefinition<T> Definition<T>(string id)
+        private DocumentDefinition<T> Definition<T>(ISaveKey<T> key)
         {
             ThrowIfDisposed();
+            if (key == null) throw new ArgumentNullException(nameof(key), "Select a SaveKey matching your document type or pass a named save definition.");
+            string id = key.Id;
             if (!definitions.TryGetValue(id, out var definition))
-                throw new KeyNotFoundException("No document definition is registered with ID '" + id + "'.");
+                throw new KeyNotFoundException("SaveProfile for slot '" + Slot.Value + "' has no definition for '" + id + "'. Register its DocumentDefinition with this profile before saving or loading.");
             return definition as DocumentDefinition<T> ??
-                throw new InvalidOperationException("The document ID is registered for a different data type.");
+                throw new InvalidOperationException("Save definition '" + id + "' is registered for a different data type. Register the DocumentDefinition matching this SaveKey's data type.");
         }
 
         public void Dispose()

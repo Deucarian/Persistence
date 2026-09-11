@@ -18,6 +18,7 @@
     "Deucarian.Persistence.Tests"
   ],
   "requiredDependencies": [
+    "com.deucarian.editor",
     "com.unity.nuget.newtonsoft-json"
   ],
   "optionalVersionDefinedDependencies": [],
