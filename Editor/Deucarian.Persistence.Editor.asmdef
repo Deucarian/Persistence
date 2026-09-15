@@ -3,7 +3,8 @@
   "rootNamespace": "Deucarian.Persistence.Editor",
   "references": [
     "Deucarian.Persistence",
-    "Deucarian.Persistence.Unity"
+    "Deucarian.Persistence.Unity",
+    "Deucarian.Editor"
   ],
   "includePlatforms": [
     "Editor"

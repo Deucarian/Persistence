@@ -11,13 +11,16 @@
     "Deucarian.Persistence.Editor"
   ],
   "sampleAssemblies": [
+    "Deucarian.Persistence.Samples.SimpleUsage",
+    "Deucarian.Persistence.Unity.Samples.DefinitionWorkflow",
     "Deucarian.Persistence.VersionedLocalSave"
   ],
   "testAssemblies": [
     "Deucarian.Persistence.Tests"
   ],
   "requiredDependencies": [
-    "com.unity.nuget.newtonsoft-json"
+    "com.unity.nuget.newtonsoft-json",
+    "com.deucarian.editor"
   ],
   "optionalVersionDefinedDependencies": [],
   "allowedDirectDebugCalls": [],

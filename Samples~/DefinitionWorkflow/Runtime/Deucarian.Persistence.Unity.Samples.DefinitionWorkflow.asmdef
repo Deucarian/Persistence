@@ -1,0 +1,7 @@
+{
+  "name": "Deucarian.Persistence.Unity.Samples.DefinitionWorkflow",
+  "references": [
+    "Deucarian.Persistence",
+    "Deucarian.Persistence.Unity"
+  ]
+}

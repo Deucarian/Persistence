@@ -1,6 +1,6 @@
 {
   "name": "com.deucarian.persistence",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "displayName": "Deucarian Persistence",
   "description": "Versioned local document persistence with migrations, validation, atomic file writes, backups, and recovery.",
   "unity": "2021.3",
@@ -19,13 +19,24 @@
     "backup"
   ],
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.deucarian.editor": "1.12.0"
   },
   "samples": [
     {
       "displayName": "Versioned Local Save",
       "description": "Demonstrates settings, profile, and run-resume documents with migration and recovery outcomes.",
       "path": "Samples~/VersionedLocalSave"
+    },
+    {
+      "displayName": "Simple Usage",
+      "description": "Minimal calls through the configured package host.",
+      "path": "Samples~/SimpleUsage"
+    },
+    {
+      "displayName": "Definition Workflow",
+      "description": "Playable scene with typed C# calls, Inspector components, editable definitions and shared host ownership.",
+      "path": "Samples~/DefinitionWorkflow"
     }
   ]
 }
